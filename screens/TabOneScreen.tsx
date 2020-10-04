@@ -2,92 +2,63 @@ import * as React from "react";
 import {FlatList, StyleSheet} from "react-native";
 
 import {Answer} from "../types";
-import {loadData} from "../utils/loadData";
-import {ProfileItem} from "../components/ProfileItem";
+import {ProfileItem} from "../components/profile/ProfileItem";
+import {ProfileModal} from "../components/profile/ProfileModal";
+import {Text, View} from "../components/Themed";
 
-export default function TabOneScreen() {
-    const [data, setData] = React.useState<Answer[]>([]);
-    const [refreshing, setRefreshing] = React.useState(false);
 
-    const loadMore = () => {
-        try {
-            loadData(
-                "https://randomuser.me/api/?page=3&results=10&inc=gender,name,nat,email,picture",
-                {}
-            ).then((e: {results: Answer[]; info: {}}) => {
-                setData((data) => {
-                    return [
-                        ...data,
-                        ...e.results.map((person, index) => {
-                            return {
-                                ...person,
-                                id: index,
-                            };
-                        }),
-                    ];
-                });
-            });
-        } catch (e) {
-            console.error(e);
-        }
-    };
+interface TabOneScreenProps {
+    data: Answer[]
 
-    const refresh = () => {
-        try {
-            loadData(
-                "https://randomuser.me/api/?page=3&results=10&inc=gender,name,nat,email,picture",
-                {}
-            ).then((e: {results: Answer[]; info: {}}) => {
-                setData([
-                    ...e.results.map((person, index) => {
-                        return {
-                            ...person,
-                            id: index,
-                        };
-                    }),
-                ]);
-            });
-        } catch (e) {
-            console.error(e);
-        }
-        setRefreshing(false);
-    };
+    refreshing: boolean
+    refresh: () => void
+    loadMore: () => void
 
-    React.useEffect(() => {
-        loadMore();
-    }, []);
+    selected: Answer | null
+    onSelect: (person: Answer) => void
 
+    isModalOpen: boolean
+    onCloseModal: () => void
+
+    error: string | null
+}
+
+export default function TabOneScreen(props: TabOneScreenProps) {
     return (
-        <FlatList
-            data={data}
-            renderItem={(data) => {
-                return <ProfileItem person={data.item} />;
-            }}
-            keyExtractor={(item, index) => index.toString()}
-            refreshing={refreshing}
-            onRefresh={() => {
-                setRefreshing(true);
-                refresh();
-            }}
-            onEndReached={(e) => loadMore()}
-            onEndReachedThreshold={0}
-        />
+        <React.Fragment>
+            <FlatList
+                data={props.data}
+                renderItem={(data) => {
+                    return <ProfileItem person={data.item} onSelect={props.onSelect}/>;
+                }}
+                keyExtractor={(item, index) => index.toString()}
+                refreshing={props.refreshing}
+                onRefresh={props.refresh}
+                onEndReached={(e) => props.loadMore()}
+                onEndReachedThreshold={0.2}
+            />
+            {props.selected &&
+            <ProfileModal
+                person={props.selected}
+
+                visible={props.isModalOpen}
+                onClose={props.onCloseModal}
+            />
+            }
+            {props.error &&
+            <View style={styles.errorContainer}>
+                <Text>{props.error}</Text>
+            </View>
+            }
+        </React.Fragment>
     );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
+    errorContainer: {
         alignItems: "center",
         justifyContent: "center",
-    },
-    title: {
-        fontSize: 20,
-        fontWeight: "bold",
-    },
-    separator: {
-        marginVertical: 30,
-        height: 1,
-        width: "80%",
+        padding: 5,
+        backgroundColor: '#ef9a9a'
     },
 });
