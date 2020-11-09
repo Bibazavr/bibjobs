@@ -13,7 +13,7 @@ export default function TabTwoScreen() {
                 darkColor="rgba(255,255,255,0.1)"
             />
             <View style={styles.aboutMe}>
-                <Text style={styles.aboutTest}>Работаю хорошо</Text>
+                <Text style={styles.aboutTest}>Работаю хорошо asdqawdewdaw</Text>
                 <Text style={styles.aboutTest}>Учусь быстро</Text>
             </View>
             <Text style={styles.aboutTest}>Тестовое задание сделано на скорую руку за пару часиков связи с нехваткой времени</Text>
